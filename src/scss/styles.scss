@@ -1,0 +1,38 @@
+// Variáveis
+$primary-color: #3498db;
+$font-stack: Helvetica, sans-serif;
+
+// Mixins
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+}
+
+// Base
+body {
+  font-family: $font-stack;
+  color: $primary-color;
+  background-color: #f8f8f8;
+}
+
+// Layout
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  @include border-radius(10px);
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+// Typography
+h1 {
+  font-size: 2.5rem;
+  color: darken($primary-color, 10%);
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.5;
+}
