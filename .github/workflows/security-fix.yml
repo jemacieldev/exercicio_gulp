@@ -1,0 +1,57 @@
+name: Security fix (npm audit)
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Usar 'npm audit fix --force' (pode incluir major versions)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: npm audit fix
+        run: npm audit fix ${{ inputs.force && '--force' || '' }} || true
+
+      - name: Testar build (gulp)
+        run: npx gulp styles scripts images || echo "BUILD_FAILED=true" >> $GITHUB_ENV
+
+      - name: Ver se algo mudou
+        id: changes
+        run: |
+          if git diff --quiet -- package.json package-lock.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Abrir Pull Request com a correção
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "fix(security): npm audit fix"
+          title: "Correção de vulnerabilidades (npm audit fix)"
+          body: |
+            PR gerado automaticamente pela Action "Security fix (npm audit)".
+
+            - Rodou `npm audit fix${{ inputs.force && ' --force' || '' }}` nos servidores do GitHub (com acesso normal à internet).
+            - Build de teste (`gulp styles scripts images`) ${{ env.BUILD_FAILED == 'true' && 'FALHOU — revisar antes de mergear!' || 'passou sem erros.' }}
+
+            Revise o diff de `package.json` / `package-lock.json` antes de mergear.
+          branch: security/npm-audit-fix
+          delete-branch: true
