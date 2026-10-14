@@ -27,8 +27,8 @@ jobs:
       - name: npm audit fix
         run: npm audit fix ${{ inputs.force && '--force' || '' }} || true
 
-      - name: Testar build (gulp)
-        run: npx gulp styles scripts images || echo "BUILD_FAILED=true" >> $GITHUB_ENV
+      - name: Testar build (gulp) — falha de verdade se der erro
+        run: npx gulp styles && npx gulp scripts && npx gulp images
 
       - name: Ver se algo mudou
         id: changes
